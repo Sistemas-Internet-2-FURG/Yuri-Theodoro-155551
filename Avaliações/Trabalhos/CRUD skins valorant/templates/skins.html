@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Skins{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Lista de Skins</h2>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <!-- Botão Adicionar Skin com classe CSS -->
+        <a href="{{ url_for('add_skin') }}" class="btn-adicionar-skin">Adicionar Skin</a>
+        
+        <!-- Formulário de Filtro -->
+        <form method="GET" action="{{ url_for('list_skins') }}" style="display: flex; align-items: center;">
+            <label for="colecao_id" style="margin-right: 10px;">Filtrar por Coleção:</label>
+            <select name="colecao_id" id="colecao_id" style="margin-right: 10px;">
+                <option value="">Todas as Coleções</option>
+                {% for colecao in colecoes %}
+                    <option value="{{ colecao.id }}" {% if colecao.id|string == colecao_id %}selected{% endif %}>
+                        {{ colecao.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label for="nome_arma" style="margin-right: 10px;">Filtrar por Nome da Arma:</label>
+            <input type="text" name="nome_arma" id="nome_arma" value="{{ nome_arma }}" style="margin-right: 10px;">
+
+            <button type="submit">Aplicar Filtros</button>
+        </form>
+    </div>
+
+    <ul>
+        {% for skin in skins %}
+            <li>
+                {{ skin.nome }} (Coleção: {{ skin.colecao_nome }})
+                <a href="{{ url_for('edit_skin', id=skin.id) }}">Editar</a>
+            </li>
+        {% else %}
+            <li>Nenhuma skin encontrada.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

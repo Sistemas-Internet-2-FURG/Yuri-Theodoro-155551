@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Skin{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Editar Skin</h2>
+    
+    <form method="POST" action="{{ url_for('edit_skin', id=skin.id) }}">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" value="{{ skin.nome }}" required>
+        
+        <label for="colecao_id">Coleção:</label>
+        <select name="colecao_id" id="colecao_id" required>
+            {% for colecao in colecoes %}
+                <option value="{{ colecao.id }}" {% if colecao.id == skin.colecao_id %}selected{% endif %}>
+                    {{ colecao.nome }}
+                </option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit">Salvar</button>
+    </form>
+</section>
+{% endblock %}

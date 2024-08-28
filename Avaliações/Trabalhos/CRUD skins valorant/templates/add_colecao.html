@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Nova Coleção{% endblock %}
+
+{% block content %}
+<h2>Adicionar Nova Coleção</h2>
+<form method="POST" action="{{ url_for('add_colecao') }}">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
+    <button type="submit">Adicionar Coleção</button>
+</form>
+{% endblock %}

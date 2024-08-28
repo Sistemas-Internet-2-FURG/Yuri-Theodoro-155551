@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Bem-vindo ao CRUD de Skins de Valorant</h2>
+    <p>Gerencie coleções e skins de forma simples e rápida.</p>
+    <img src="{{ url_for('static', filename='images/colecao-banner.png') }}" alt="Banner Coleções">
+    <img src="{{ url_for('static', filename='images/skin-banner.png') }}" alt="Banner Skins">
+    <img src="{{ url_for('static', filename='images/skin-banner4.png') }}" alt="Banner Skins">
+    <img src="{{ url_for('static', filename='images/skin-banner3.png') }}" alt="Banner Skins">
+    <img src="{{ url_for('static', filename='images/skin-banner2.png') }}" alt="Banner Skins">
+{% endblock %}

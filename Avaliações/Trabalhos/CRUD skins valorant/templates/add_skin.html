@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Nova Skin{% endblock %}
+
+{% block content %}
+<section>
+    <h2>Adicionar Nova Skin</h2>
+    <form method="POST" action="{{ url_for('add_skin') }}">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required>
+        
+        <label for="colecao_id">Coleção:</label>
+        <select name="colecao_id" id="colecao_id" required>
+            {% for colecao in colecoes %}
+                <option value="{{ colecao.id }}">{{ colecao.nome }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit">Adicionar Skin</button>
+    </form>
+</section>
+{% endblock %}
