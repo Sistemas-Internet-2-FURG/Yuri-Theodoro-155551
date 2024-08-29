@@ -3,22 +3,22 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Criação da instância do Flask
+#Criação da instância do Flask
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Em produção, mova isso para uma variável de ambiente
+app.secret_key = 'your_secret_key' 
 
 # Configuração do Flask-Login para gerenciar autenticação
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # Página de login quando usuário não autenticado tenta acessar uma rota protegida
 
-# Função para obter conexão com o banco de dados
+#função para obter conexão com o banco de dados
 def get_db_connection():
-    conn = sqlite3.connect('database.db')  # Conecta ao banco de dados
-    conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelo nome
+    conn = sqlite3.connect('database.db')  #Conecta ao banco de dados
+    conn.row_factory = sqlite3.Row  # ermite acessar as colunas pelo nome
     return conn
 
-# Função para criar a tabela de usuários
+#Função para criar a tabela de usuários
 def create_users_table():
     conn = get_db_connection()
     conn.execute('''
@@ -27,11 +27,11 @@ def create_users_table():
             username TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL
         );
-    ''')  # Cria a tabela se não existir
+    ''')  #Cria a tabela se não existir
     conn.commit()
     conn.close()
 
-# Função para criar a tabela de coleções
+#Função para criar a tabela de coleções
 def create_colecoes_table():
     conn = get_db_connection()
     conn.execute('''
@@ -39,11 +39,11 @@ def create_colecoes_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL
         );
-    ''')  # Cria a tabela se não existir
+    ''')  #Cria a tabela se não existir
     conn.commit()
     conn.close()
 
-# Função para criar a tabela de skins
+#Função para criar a tabela de skins
 def create_skins_table():
     conn = get_db_connection()
     conn.execute('''
@@ -53,16 +53,16 @@ def create_skins_table():
             colecao_id INTEGER,
             FOREIGN KEY (colecao_id) REFERENCES colecoes (id)
         );
-    ''')  # Cria a tabela se não existir, com relação estrangeira para coleções
+    ''')  #Cria a tabela se não existir, com relação estrangeira para coleções
     conn.commit()
     conn.close()
 
-# Função para criar outras tabelas necessárias
+#Função para criar outras tabelas necessárias
 def create_other_tables():
     create_colecoes_table()
     create_skins_table()
 
-# Classe User para gerenciar a autenticação do usuário
+#Classe User para gerenciar a autenticação do usuário
 class User(UserMixin):
     def __init__(self, id, username, password):
         self.id = id
@@ -72,7 +72,7 @@ class User(UserMixin):
     def get_id(self):
         return str(self.id)
 
-# Função para carregar um usuário pelo ID, necessário para o Flask-Login
+#Função para carregar um usuário pelo ID, necessário para o Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db_connection()
@@ -85,12 +85,12 @@ def load_user(user_id):
         return None
     return User(user['id'], user['username'], user['password'])
 
-# Rota para a página inicial
+#Rota para a página inicial
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Rota para listar coleções, protegida por autenticação
+#Rota para listar coleções
 @app.route('/colecoes')
 @login_required
 def list_colecoes():
@@ -101,7 +101,7 @@ def list_colecoes():
         conn.close()
     return render_template('colecoes.html', colecoes=colecoes)
 
-# Rota para adicionar uma nova coleção, protegida por autenticação
+#Rota para adicionar uma nova coleção
 @app.route('/colecoes/novo', methods=['GET', 'POST'])
 @login_required
 def add_colecao():
@@ -119,7 +119,7 @@ def add_colecao():
             return "Nome da coleção não pode estar vazio.", 400
     return render_template('add_colecao.html')
 
-# Rota para editar uma coleção existente, protegida por autenticação
+#Rota para editar uma coleção existente
 @app.route('/colecoes/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
 def edit_colecao(id):
@@ -139,7 +139,7 @@ def edit_colecao(id):
     conn.close()
     return render_template('edit_colecao.html', colecao=colecao)
 
-# Rota para deletar uma coleção, protegida por autenticação
+#Rota para deletar uma coleção
 @app.route('/colecoes/<int:id>/deletar', methods=['POST'])
 @login_required
 def delete_colecao(id):
@@ -151,16 +151,16 @@ def delete_colecao(id):
         conn.close()
     return redirect(url_for('list_colecoes'))
 
-# Rota para listar skins, com filtros opcionais, protegida por autenticação
+#Rota para listar skins, com filtros opcionais
 @app.route('/skins')
 @login_required
 def list_skins():
     conn = get_db_connection()
     
-    colecao_id = request.args.get('colecao_id')  # Obtém parâmetros da query string
+    colecao_id = request.args.get('colecao_id')  #Obtém parâmetros da query string
     nome_arma = request.args.get('nome_arma', '')
 
-    # Monta a consulta SQL dinamicamente com base nos filtros
+    #Monta a consulta SQL dinamicamente com base nos filtros
     query = '''
         SELECT skins.id, skins.nome, colecoes.nome AS colecao_nome
         FROM skins
@@ -186,7 +186,7 @@ def list_skins():
 
     return render_template('skins.html', skins=skins, colecoes=colecoes, colecao_id=colecao_id, nome_arma=nome_arma)
 
-# Rota para adicionar uma nova skin, protegida por autenticação
+#Rota para adicionar uma nova skin, protegida por autenticação
 @app.route('/skins/novo', methods=['GET', 'POST'])
 @login_required
 def add_skin():
@@ -209,7 +209,7 @@ def add_skin():
         conn.close()
     return render_template('add_skin.html', colecoes=colecoes)
 
-# Rota para editar uma skin existente, protegida por autenticação
+#Rota para editar uma skin existente, protegida por autenticação
 @app.route('/skins/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
 def edit_skin(id):
@@ -233,7 +233,7 @@ def edit_skin(id):
         conn.close()
     return render_template('edit_skin.html', skin=skin, colecoes=colecoes)
 
-# Rota para deletar uma skin, protegida por autenticação
+#Rota para deletar uma skin, protegida por autenticação
 @app.route('/skins/<int:id>/deletar', methods=['POST'])
 @login_required
 def delete_skin(id):
@@ -245,7 +245,7 @@ def delete_skin(id):
         conn.close()
     return redirect(url_for('list_skins'))
 
-# Rota para login de usuários
+#Rota para login de usuários
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -265,14 +265,14 @@ def login():
             return redirect(url_for('login'))
     return render_template('login.html')
 
-# Rota para logout de usuários
+#Rota para logout de usuários
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()  # Desloga o usuário
     return redirect(url_for('login'))
 
-# Rota para registro de novos usuários
+#Rota para registro de novos usuários
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -288,10 +288,10 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
-# Criação das tabelas ao iniciar a aplicação
+#Criação das tabelas ao iniciar a aplicação
 create_users_table()
 create_other_tables()
 
-# Inicialização do servidor Flask
+
 if __name__ == '__main__':
-    app.run(debug=True)  # Executa o servidor em modo de depuração
+    app.run(debug=True)  
