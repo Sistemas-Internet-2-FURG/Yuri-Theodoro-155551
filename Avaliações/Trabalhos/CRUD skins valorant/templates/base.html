@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Valorant Skins CRUD{% endblock %}</title>
+    <link rel="icon" href="static\images\valorant-icon.png">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.cdnfonts.com/css/valorant" rel="stylesheet">
     <style>
@@ -18,9 +19,9 @@
                 <li><a href="{{ url_for('list_colecoes') }}">Coleções</a></li>
                 <li><a href="{{ url_for('list_skins') }}">Skins</a></li>
 
-                {% if session.get('logged_in') %}
-                    <li>Bem-vindo, {{ session.get('username') }}!</li>
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% if current_user.is_authenticated %}
+                    <li>Bem-vindo, {{ current_user.username }}!</li>
+                    <li><a href="{{ url_for('logout') }}">Sair</a></li>
                 {% else %}
                     <li><a href="{{ url_for('login') }}">Login</a></li>
                     <li><a href="{{ url_for('register') }}">Registro</a></li>

@@ -1,18 +1,28 @@
 {% extends 'base.html' %}
 
-{% block title %}Coleções{% endblock %}
+{% block title %}Lista de Coleções{% endblock %}
 
 {% block content %}
-<h2>Lista de Coleções</h2>
-<ul>
-    {% for colecao in colecoes %}
-    <li>{{ colecao['nome'] }}
-        <a href="{{ url_for('edit_colecao', id=colecao['id']) }}">Editar</a>
-        <form action="{{ url_for('delete_colecao', id=colecao['id']) }}" method="POST" style="display:inline;">
-            <button type="submit">Deletar</button>
-        </form>
-    </li>
-    {% endfor %}
-</ul>
-<a href="{{ url_for('add_colecao') }}">Adicionar Nova Coleção</a>
+<section>
+    <h2>Lista de Coleções</h2>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+
+        <a href="{{ url_for('add_colecao') }}" class="btn-adicionar-colecao">Adicionar Coleção</a>
+    </div>
+
+    <ul>
+        {% for colecao in colecoes %}
+            <li>
+                {{ colecao.nome }}
+                <a href="{{ url_for('edit_colecao', id=colecao.id) }}">Editar</a>
+                <form action="{{ url_for('delete_colecao', id=colecao.id) }}" method="post" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Tem certeza de que deseja deletar esta coleção?');">Deletar</button>
+                </form>
+            </li>
+        {% else %}
+            <li>Nenhuma coleção encontrada.</li>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}
