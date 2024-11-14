@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>VALORANT SKINS CRUD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Valorant Skins CRUD</h1>
+
+    <div id="auth-section">
+        <h2>Autenticação</h2>
+        <div>
+            <h3>Login</h3>
+            <input type="text" id="login-username" placeholder="Nome de usuário">
+            <input type="password" id="login-password" placeholder="Senha">
+            <button onclick="login()">Entrar</button>
+        </div>
+        <div>
+            <h3>Registrar</h3>
+            <input type="text" id="register-username" placeholder="Nome de usuário">
+            <input type="password" id="register-password" placeholder="Senha">
+            <button onclick="register()">Registrar</button>
+        </div>
+        <button onclick="logout()">Sair</button>
+    </div>
+
+    <div id="data-section" style="display: none;">
+        <h2>Coleções</h2>
+        <ul id="colecoes-list"></ul>
+        <input type="text" id="new-colecao-nome" placeholder="Nome da Coleção">
+        <button onclick="addColecao()">Adicionar Coleção</button>
+
+        <h2>Skins</h2>
+        <button onclick="addSkin()">Adicionar Skin</button>
+        <ul id="skins-list"></ul>
+
+        <input type="text" id="new-skin-nome" placeholder="Nome da Skin">
+        <select id="new-skin-colecao-id">
+            <option value="">Selecione uma Coleção</option>
+        </select>
+    </div>
+
+    <script>
+        let token = '';
+
+        function showDataSection() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('data-section').style.display = 'block';
+            fetchColecoes();
+            fetchSkins();
+        }
+
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (data.token) {
+                    token = data.token;
+                    showDataSection();
+                } else {
+                    alert('Falha no login: ' + (data.error || 'Erro desconhecido.'));
+                }
+            } catch (error) {
+                alert('Erro ao processar o login: ' + error.message);
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                alert(data.message || 'Erro: ' + (data.error || 'Erro desconhecido.'));
+            } catch (error) {
+                alert('Erro ao processar o registro: ' + error.message);
+            }
+        }
+
+        function logout() {
+            token = '';
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('data-section').style.display = 'none';
+        }
+
+        async function fetchColecoes() {
+            try {
+                const response = await fetch('/colecoes', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const data = await response.json();
+                const colecoesList = document.getElementById('colecoes-list');
+                const colecaoSelect = document.getElementById('new-skin-colecao-id');
+
+                colecoesList.innerHTML = '';
+                colecaoSelect.innerHTML = '<option value="">Selecione uma Coleção</option>';
+
+                data.forEach(colecao => {
+                    const item = document.createElement('li');
+                    item.innerHTML = `${colecao.nome}
+                        <button onclick="editColecao(${colecao.id}, '${colecao.nome}')">Editar</button>
+                        <button onclick="deleteColecao(${colecao.id})">Excluir</button>`;
+                    colecoesList.appendChild(item);
+
+                    const option = document.createElement('option');
+                    option.value = colecao.id;
+                    option.textContent = colecao.nome;
+                    colecaoSelect.appendChild(option);
+                });
+            } catch (error) {
+                alert('Erro ao buscar coleções: ' + error.message);
+            }
+        }
+
+        async function addColecao() {
+            const nome = document.getElementById('new-colecao-nome').value;
+
+            try {
+                await fetch('/colecoes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nome })
+                });
+
+                alert('Coleção adicionada com sucesso!');
+                fetchColecoes();
+            } catch (error) {
+                alert('Erro ao adicionar coleção: ' + error.message);
+            }
+        }
+
+        async function editColecao(id, currentNome) {
+            const novoNome = prompt("Novo nome da coleção:", currentNome);
+
+            if (!novoNome) return;
+
+            try {
+                await fetch(`/colecoes/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nome: novoNome })
+                });
+
+                alert('Coleção atualizada com sucesso!');
+                fetchColecoes();
+            } catch (error) {
+                alert('Erro ao editar coleção: ' + error.message);
+            }
+        }
+
+        async function deleteColecao(id) {
+            if (!confirm("Tem certeza que deseja excluir essa coleção?")) return;
+
+            try {
+                await fetch(`/colecoes/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                alert('Coleção deletada com sucesso!');
+                fetchColecoes();
+            } catch (error) {
+                alert('Erro ao excluir coleção: ' + error.message);
+            }
+        }
+
+        async function fetchSkins() {
+            try {
+                const response = await fetch('/skins', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const data = await response.json();
+                const skinsList = document.getElementById('skins-list');
+                skinsList.innerHTML = '';
+
+                data.forEach(skin => {
+                    const item = document.createElement('li');
+                    item.innerHTML = `${skin.nome} (Coleção: ${skin.colecao_nome})
+                        <button onclick="editSkin(${skin.id}, '${skin.nome}', ${skin.colecao_id})">Editar</button>
+                        <button onclick="deleteSkin(${skin.id})">Excluir</button>`;
+                    skinsList.appendChild(item);
+                });
+            } catch (error) {
+                alert('Erro ao buscar skins: ' + error.message);
+            }
+        }
+
+        async function addSkin() {
+            const nome = document.getElementById('new-skin-nome').value;
+            const colecao_id = document.getElementById('new-skin-colecao-id').value;
+
+            if (!colecao_id) {
+                alert('Por favor, selecione uma coleção para a skin.');
+                return;
+            }
+
+            try {
+                await fetch('/skins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nome, colecao_id })
+                });
+
+                alert('Skin adicionada com sucesso!');
+                fetchSkins();
+            } catch (error) {
+                alert('Erro ao adicionar skin: ' + error.message);
+            }
+        }
+
+        async function editSkin(id, currentNome, currentColecaoId) {
+            const novoNome = prompt("Novo nome da skin:", currentNome);
+
+            if (!novoNome) return;
+
+            try {
+                await fetch(`/skins/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ nome: novoNome, colecao_id: currentColecaoId })
+                });
+
+                alert('Skin atualizada com sucesso!');
+                fetchSkins();
+            } catch (error) {
+                alert('Erro ao editar skin: ' + error.message);
+            }
+        }
+
+        async function deleteSkin(id) {
+            if (!confirm("Tem certeza que deseja excluir essa skin?")) return;
+
+            try {
+                await fetch(`/skins/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                alert('Skin deletada com sucesso!');
+                fetchSkins();
+            } catch (error) {
+                alert('Erro ao excluir skin: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
